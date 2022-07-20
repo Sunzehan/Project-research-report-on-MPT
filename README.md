@@ -43,7 +43,7 @@ Patria Trie也是一种树形的数据结构，常用的使用场景包括：搜
 
 所以这种数据结构的应用场景多为用于快速查找前缀相同的数据，内存开销较少。如以下数据及对应的trie表示为：
 
-![图片](https://user-images.githubusercontent.com/107350922/179987404-dd3332c9-c14a-4632-a4b0-57d8c2dfc800.png)【2】
+![图片](https://user-images.githubusercontent.com/107350922/179990030-7169c99e-7e5a-45ba-9ef2-08e9ec517479.png)【2】
 
 Merkle Patricia Trie（下面简称MPT），在Trie的基础上，给每个节点计算了一个哈希值，在Substrate（一种规格的树结构，每个节点最多有16个子节点：）中，该值通过对节点内容进行加密hash算法如Blake2运算取得，用来索引数据库和计算merkle root。也就是说，MPT用到了两种key的类型。
 
