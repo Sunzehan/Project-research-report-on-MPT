@@ -47,6 +47,7 @@ Patria Trie也是一种树形的数据结构，常用的使用场景包括：搜
 Merkle Patricia Trie（下面简称MPT），在Trie的基础上，给每个节点计算了一个哈希值，在Substrate（一种规格的树结构，每个节点最多有16个子节点：）中，该值通过对节点内容进行加密hash算法如Blake2运算取得，用来索引数据库和计算merkle root。也就是说，MPT用到了两种key的类型。
 
 一种是Trie路径所对应的key，由runtime模块的存储单元决定。使用Substrate开发的应用链，它所拥有的各个模块的存储单元会通过交易进行修改，成为链上状态（简称为state）。每个存储单元的状态都是通过键值对以trie节点的形式进行索引或者保存的，这里键值对的value是原始数据（如数值、布尔）的SCALE编码结果，并作为MPT节点内容的一部分进行保存；key是模块、存储单元等的哈希组合，且和存储数据类型紧密相关，如：
+
   单值类型（即Storage Value），它的key是Twox128(module_prefix) ++ Twox128(storage_prefix)；
   
   简单映射类型（即map），可以表示一系列的键值数据，它的存储位置和map中的键相关，即Twox128(module_prefix) + Twox128(storage_prefix) + hasher(encode(map_key))；
