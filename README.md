@@ -53,7 +53,7 @@ Merkle Patricia Trie（下面简称MPT），在Trie的基础上，给每个节�
   
   链接映射类型（即linked_map），和map类似，key是Twox128(module_prefix) + Twox128(storage_prefix) + hasher(encode(map_key))；它的head存储在Twox128(module) + Twox128("HeadOf" + storage_prefix)；
   
-    双键映射类型（即double_map），key是twox128(module_prefix) + twox128(storage_prefix) + hasher1(encode(map_key1)) + hasher2(encode(map_key2))。【3】
+  双键映射类型（即double_map），key是twox128(module_prefix) + twox128(storage_prefix) + hasher1(encode(map_key1)) + hasher2(encode(map_key2))。【3】
 
 计算key所用到 Twox128 是一种非加密的哈希算法，计算速度非常快，但去除了一些严格的要求，如抗碰撞、混淆性等，从而无法保证安全性，适用于输入固定且数量有限的场景中。module_prefix通常是模块的实例名称；storage_prefix通常是存储单元的名称；原始的key通过SCALE编码器进行编码，再进行哈希运算，这里的哈希算法是可配置的--根据输入来源是否可信作为判断依据，调整hash函数的使用，如用户输入可以认为是不不可信的，则使用Blake2（也是默认的哈希算法），否则可以使用Twox。
 
