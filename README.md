@@ -151,11 +151,11 @@ Merkle Tree是区块链应用中必不可少底层结构。
 
 【7】https://copyfuture.com/blogs-details/20211208055551745d
 
-【8】Google search : Deep Dive - Substrate Storage
+【8】https://www.youtube.com/watch?v=9S8rmW8LD5o&t=3s
 
 【9】Substrate官方文档：https://substrate.dev/
 
-【10】Google search : Wiki Trie
+【10】[Google search : Wiki Trie](https://en.wikipedia.org/wiki/Trie)
 
 【11】arity介绍：https://www.parity.io/
 
