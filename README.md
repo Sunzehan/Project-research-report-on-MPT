@@ -63,6 +63,9 @@ Merkle Patricia Trie（下面简称MPT），在Trie的基础上，给每个节�
 
 Trie节点主要有三类，即叶子节点（Leaf）、有值分支节点（BranchWithValue）和无值分支节点（BranchNoValue）；有一个特例，当trie本身为空的时候存在唯一的空节点（Empty）。根据类型不同，trie节点存储内容有稍许不同，通常会包含header、trie路径的部分key、children节点以及value。下面举一个具体例子。
 
+![图片](https://user-images.githubusercontent.com/107350922/180148217-3fe69513-a078-4bc9-974b-93331bafc389.png)
+
+如果对于上表的数据
 
 **参考资料：**
 
