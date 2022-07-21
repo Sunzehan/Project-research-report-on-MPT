@@ -39,11 +39,11 @@ Merkel tree示例如图所示：
 
 **Merkle Patricia Trie原理**
 
-Substrate数据存储的底层实现本质上就是Merkle Patricia Trie【10】
+Substrate数据存储的底层实现本质上就是Merkle Patricia Trie
 
 我们先来谈谈Patria Trie，他也是一种树形的数据结构，常用的使用场景包括：搜索引擎的自动补全功能；IP路由等。
 
-Trie的特点是，某节点的key是从根节点到该节点的路径，即不同的key有相同前缀时，它们共享前缀所对应的路径。
+Trie的特点是，某节点的key是从根节点到该节点的路径，即不同的key有相同前缀时，它们共享前缀所对应的路径。【10】
 
 所以这种数据结构的应用场景多为用于快速查找前缀相同的数据，内存开销较少。如以下数据及对应的trie表示为：
 
@@ -151,11 +151,11 @@ Merkle Tree是区块链应用中必不可少底层结构。
 
 【7】https://copyfuture.com/blogs-details/20211208055551745d
 
-【8】Deep Dive - Substrate Storage
+【8】Google search : Deep Dive - Substrate Storage
 
 【9】Substrate官方文档：https://substrate.dev/
 
-【10】Wiki Trie
+【10】Google search : Wiki Trie
 
 【11】arity介绍：https://www.parity.io/
 
