@@ -39,7 +39,11 @@ Merkel tree示例如图所示：
 
 **Merkle Patricia Trie原理**
 
-Patria Trie也是一种树形的数据结构，常用的使用场景包括：搜索引擎的自动补全功能；IP路由等。Trie的特点是，某节点的key是从根节点到该节点的路径，即不同的key有相同前缀时，它们共享前缀所对应的路径。
+Substrate数据存储的底层实现本质上就是Merkle Patricia Trie【10】
+
+我们先来谈谈Patria Trie，他也是一种树形的数据结构，常用的使用场景包括：搜索引擎的自动补全功能；IP路由等。
+
+Trie的特点是，某节点的key是从根节点到该节点的路径，即不同的key有相同前缀时，它们共享前缀所对应的路径。
 
 所以这种数据结构的应用场景多为用于快速查找前缀相同的数据，内存开销较少。如以下数据及对应的trie表示为：
 
@@ -63,9 +67,73 @@ Merkle Patricia Trie（下面简称MPT），在Trie的基础上，给每个节�
 
 Trie节点主要有三类，即叶子节点（Leaf）、有值分支节点（BranchWithValue）和无值分支节点（BranchNoValue）；有一个特例，当trie本身为空的时候存在唯一的空节点（Empty）。根据类型不同，trie节点存储内容有稍许不同，通常会包含header、trie路径的部分key、children节点以及value。下面举一个具体例子。
 
-![图片](https://user-images.githubusercontent.com/107350922/180148217-3fe69513-a078-4bc9-974b-93331bafc389.png)
+![图片](https://user-images.githubusercontent.com/107350922/180148217-3fe69513-a078-4bc9-974b-93331bafc389.png)【2】
 
-如果对于上表的数据
+如果对于上表的数据，如果我们将其转化位trie结构进行表示即（Trie路径所对应的key），通用的trie构建思路为：
+
+构建trie节点，header表示该tried节点的级数，1开头表示用于索引的目录节点，0开头则表示数据节点
+
+每个数据节点拥有自己节点对应的key
+
+在检索数据的时候经过目录trie节点的时候需要将该节点对应的部分key值（这里使用了两位，作为key的前缀）加入带检索的key值，经过数据节点的时候，则将其key值作为当前检索的key值的剩余位级联到后面。
+
+**于是构建了如下所示的trie结构**
+
+![图片](https://user-images.githubusercontent.com/107350922/180214305-69157963-e2ae-440b-b838-443b510eb984.png)【2】
+ 
+ 根据上图进行说明，由于根据原始数据的位数，这里使用不同的header值来表示不同的节点类型，即01表示叶子节点，10表示无值的分支节点，11表示有值的分支节点。
+ 
+ 为了提高存储和查找的效率，Substrate使用的MPT和基本的trie不同的是，并不是trie path key的每一位都对应一个节点，当key的连续位之间没有分叉时，节点可以直接使用该连续位。对于叶子节点，连续位可以是trie path key的最后几位；对于分支节点，连续位是从当前位开始到出现分叉位结束。
+ 
+ 在昨天（上面）的介绍中，我们知道Substrate采用了base-16的trie结构，即一个分支节点最多可以有16个子节点。
+    
+接着，我们对每个节点计算出对应的哈希，首先计算出叶子节点的哈希值，它们被上一级的分支节点所引用，用来在数据库中查找对应的节点；然后计算分支节点的哈希值，直至递归抵达根节点，这里用到的哈希算法是Blake2。【5】
+
+![图片](https://user-images.githubusercontent.com/107350922/180215620-e0ebf875-edf1-4887-b85e-91e03e8ab8f8.png)
+
+数据库的物理存储大致如下：
+
+key	     value
+
+Hroot	 encode(root_node)
+
+H00	   encode(node_00)
+
+H01  	 encode(node_01)
+
+H02	   encode(node_02)
+
+H03	   encode(node_03)
+
+H04	   encode(node_04)
+
+这里再补充一点：数据库中存储的key是上面所计算的节点哈希；存储的value是节点内容的特定编码，对于节点中保存的值是对应的SCALE编码结果。
+
+RocksDB提供了column的概念，用来存储互相隔离的数据。例如，HEADER column存储着所有的区块头；BODY column存储着所有的区块体，也就是所有的存储单元状态。【7】
+
+**Child Trie**
+
+Substrate还提供child trie这样的数据结构，它也是一个MPT。Substrate的应用链可以有很多child trie，每个child trie有唯一的标识进行索引，它们可以彼此隔离，提升存储和查询效率。State trie或者main trie的叶子节点可以是child trie的根哈希，来保存对应child trie的状态。Child trie的一个典型应用是Substrate的contracts功能模块，每一个智能合约对应着自己唯一的child trie。
+区块裁剪【8】
+
+区块的无限增长往往给去中心的节点造成较大的存储消耗，通常只有少数的节点需要提供过往历史数据，大部分节点在能够确保状态最终性之后，可以将不需要的区块数据删除，从而提升节点的性能。Substrate也内置了裁剪的功能，示意图如下：【9】
+
+![图片](https://user-images.githubusercontent.com/107350922/180217182-7e5f51b5-3742-48f9-961d-9b2b6f66fbc5.png)
+
+我们可以看到在区块13中，只有node-4的值从04变为40，其哈希也跟着改变，而其它节点的数据并没有变化，
+
+所以新的区块根节点可以复用原有节点，仅仅更新发生变化的节点。假设区块13已经具有最终性，那么区块12中的node-4就可以删除掉。
+
+Substrate默认的区块生成算法是BABE或者Aura，而最终性是通过GRANDPA来决定的，在网络稳定的情况下，仅保留一定数量的最新区块是可行的。【11】
+
+**MPT研究报告总结**
+
+Merkle Tree是区块链应用中必不可少底层结构。
+
+而在Substrate中采用的Patricia Merkle Trie与Merkle Tree的不同之处在于进一步对Merkle Tree的结构进行复合与深化，
+
+需要说明的是，在官方文档中Substrate还提供了强大而且高效的cache功能，使得读写效率可以达到期望。【11】
+
 
 **参考资料：**
 
@@ -76,4 +144,18 @@ Trie节点主要有三类，即叶子节点（Leaf）、有值分支节点（Bra
 【3】https://zhuanlan.zhihu.com/p/32924994
 
 【4】https://www.jianshu.com/p/5e2483413537?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes&utm_source=recommendation
+
+【5】https://sickworm.com/?p=1749
+
+【6】https://www.jianshu.com/p/e67452930dcc?utm_campaign=maleskine&utm_content=note&utm_medium=seo_notes
+
+【7】https://copyfuture.com/blogs-details/20211208055551745d
+
+【8】Deep Dive - Substrate Storage
+
+【9】Substrate官方文档：https://substrate.dev/
+
+【10】Wiki Trie
+
+【11】arity介绍：https://www.parity.io/
 
