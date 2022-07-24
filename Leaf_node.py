@@ -60,9 +60,3 @@ class LeafNode(node):
 
     def gethash(self):
         return self.hash
-
-# test = LeafNode("a711355","45")
-# print(test.__class__)
-# print(test.__class__ == LeafNode)
-# test.printNode(1)
-# print(test.hash)
