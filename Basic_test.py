@@ -6,6 +6,7 @@ testcase = {'7c3002ad756d76a643cb09cd45409608abb642d9': '10',
 #测试数据模拟md文件中的第三张图片生成的数据
 #注意需要import之前写的MPT class
 #test1---新节点的生成（原先是空节点）
+#测试的运行结果会放在md文件最后进行展示
 
 from MPT import MerklePatriciaTrie
 
