@@ -6,6 +6,7 @@ from BranchNodeClass import BranchNode
 from LeafNode import LeafNode
 #说明这个文件构建的是一个trie的扩展节点类
 #用于后续功能实现的调用！
+#综合使用
 
 
 class ExtensionNode(node):
